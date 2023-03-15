@@ -12,7 +12,7 @@
 #define IND_PIN 9
 // Encoders' pins
 #define CHANNEL_A 2
-#define CHANEEL_B 3
+#define CHANNEL_B 3
 // Controller's parameters
 #define KP 0.5
 #define KI 5e-3
@@ -27,7 +27,7 @@
 
 
 Controller g_controller(KP, KI, KD);
-Encoder g_encoder(CHANNEL_A, CHANEEL_B);
+Encoder g_encoder(CHANNEL_A, CHANNEL_B);
 MotorDriver g_driver(ENA_PIN, ENB_PIN, INA_PIN, INB_PIN, INC_PIN, IND_PIN);
 
 
