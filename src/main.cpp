@@ -15,21 +15,20 @@
 #define CHANEEL_B 3
 // Controller's parameters
 #define KP 0.5
-#define KI 1e-4
-#define KD 0
+#define KI 5e-3
+#define KD 5e-3
 
-#define MAX_APPLY_VOLTAGE 210
-#define MIN_APPLY_VOLTAGE 30
+#define MAX_APPLY_VOLTAGE 200
+#define MIN_APPLY_VOLTAGE 50
 
 #define BAUDRATE 9600
 #define WARMUP_TIME 5000
-#define SETTLE_CONDITION 0.95
+#define SETTLE_CONDITION 0.99
 
 
 Controller g_controller(KP, KI, KD);
 Encoder g_encoder(CHANNEL_A, CHANEEL_B);
 MotorDriver g_driver(ENA_PIN, ENB_PIN, INA_PIN, INB_PIN, INC_PIN, IND_PIN);
-bool g_settling = true;
 
 
 void onInterrupt() {
@@ -48,7 +47,7 @@ void setup() {
 
 
 void loop() {
-  float setAngle = 90;
+  float setAngle = 180;
   float setPoint = map(setAngle, 0, 360, 0, 450);
   int64_t feedback = g_encoder.readPosition();
 
@@ -61,25 +60,20 @@ void loop() {
   g_controller.receiveSetPoint(setPoint);
   g_controller.receiveFeedback(feedback);
   float controlSignal = g_controller.sendControlSignal();
-  uint8_t applyVoltage = abs(controlSignal);
-  applyVoltage = min(applyVoltage, MAX_APPLY_VOLTAGE);
-  applyVoltage = max(applyVoltage, MIN_APPLY_VOLTAGE);
 
   if (controlSignal > 0) {
-      g_driver.driveLeftMotorForward(applyVoltage);
+      controlSignal = min(controlSignal, MAX_APPLY_VOLTAGE);
+      controlSignal = max(controlSignal, MIN_APPLY_VOLTAGE);
   }
   else {
-      g_driver.driveLeftMotorBackward(applyVoltage);
+      controlSignal = max(controlSignal, -MAX_APPLY_VOLTAGE);
+      controlSignal = min(controlSignal, -MIN_APPLY_VOLTAGE);
   }
+  g_driver.driveLeftMotor(controlSignal);
 
+  uint8_t feedbackAngle = map(feedback, 0, 450, 0, 360);
   Serial.print("Feedback: ");
-  Serial.print((int32_t)feedback);
+  Serial.print((int32_t)feedbackAngle);
   Serial.print("\tControl signal: ");
-  if (controlSignal > 0) {
-      Serial.println(applyVoltage);
-  }
-  else {
-      Serial.println("-");
-      Serial.println(applyVoltage);
-  }
+  Serial.println(controlSignal);
 }

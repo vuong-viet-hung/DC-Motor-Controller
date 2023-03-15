@@ -30,31 +30,30 @@ void MotorDriver::connect() {
 };
 
 
-void MotorDriver::driveLeftMotorForward(const uint8_t controlSignal) {
-    analogWrite(enaPin, controlSignal);
-    digitalWrite(inaPin, HIGH);
-    digitalWrite(inbPin, LOW);  
+void MotorDriver::driveLeftMotor(const int16_t controlSignal) {
+    if (controlSignal > 0) {
+        digitalWrite(inaPin, HIGH);
+        digitalWrite(inbPin, LOW);  
+    }
+    else {
+        digitalWrite(inaPin, LOW);
+        digitalWrite(inbPin, HIGH);
+    }
+    analogWrite(enaPin, abs(controlSignal));
 };
 
 
-void MotorDriver::driveRightMotorForward(const uint8_t controlSignal) {
-    analogWrite(enbPin, controlSignal);
-    digitalWrite(incPin, HIGH);
-    digitalWrite(indPin, LOW);
+void MotorDriver::driveRightMotor(const int16_t controlSignal) {
+    if (controlSignal > 0) {
+        digitalWrite(incPin, HIGH);
+        digitalWrite(indPin, LOW);
+    }
+    else {
+        digitalWrite(inaPin, LOW);
+        digitalWrite(inbPin, HIGH);
+    }
+    analogWrite(enbPin, abs(controlSignal));
 };
-
-void MotorDriver::driveLeftMotorBackward(const uint8_t controlSignal) {
-    analogWrite(enaPin, controlSignal);
-    digitalWrite(inaPin, LOW);
-    digitalWrite(inbPin, HIGH);
-}
-
-
-void MotorDriver::driveRightMotorBackward(const uint8_t controlSignal) {
-    analogWrite(enaPin, controlSignal);
-    digitalWrite(incPin, LOW);
-    digitalWrite(indPin, HIGH);
-}
 
 
 void MotorDriver::stopLeftMotor() {

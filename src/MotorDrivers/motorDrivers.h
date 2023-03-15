@@ -14,10 +14,8 @@ public:
         const uint8_t indPin
     );
     void connect();
-    void driveLeftMotorForward(uint8_t controlSignal);
-    void driveRightMotorForward(uint8_t controlSignal);
-    void driveLeftMotorBackward(uint8_t controlSignal);
-    void driveRightMotorBackward(uint8_t controlSignal);
+    void driveLeftMotor(int16_t controlSignal);
+    void driveRightMotor(int16_t controlSignal);
     void stopLeftMotor();
     void stopRightMotor();
 };
