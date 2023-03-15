@@ -19,7 +19,7 @@
 #define KD 5e-3
 
 #define MAX_APPLY_VOLTAGE 200
-#define MIN_APPLY_VOLTAGE 50
+#define MIN_APPLY_VOLTAGE 100
 
 #define BAUDRATE 9600
 #define WARMUP_TIME 5000
@@ -47,7 +47,7 @@ void setup() {
 
 
 void loop() {
-  float setAngle = 180;
+  float setAngle = 270;
   float setPoint = map(setAngle, 0, 360, 0, 450);
   int64_t feedback = g_encoder.readPosition();
 
@@ -71,7 +71,7 @@ void loop() {
   }
   g_driver.driveLeftMotor(controlSignal);
 
-  uint8_t feedbackAngle = map(feedback, 0, 450, 0, 360);
+  uint16_t feedbackAngle = map(feedback, 0, 450, 0, 360);
   Serial.print("Feedback: ");
   Serial.print((int32_t)feedbackAngle);
   Serial.print("\tControl signal: ");
