@@ -3,9 +3,10 @@
 #include "Encoders/encoders.h"
 
 
-Encoder::Encoder(const uint8_t channelA, const uint8_t channelB) {
+Encoder::Encoder(const uint8_t channelA, const uint8_t channelB, uint16_t pulsePerRevolution) {
     this->channelA = channelA;
     this->channelB = channelB;
+    this->pulsePerRevolution = pulsePerRevolution;
 };
 
 
@@ -15,12 +16,12 @@ void Encoder::connect() {
 };
 
 
-void Encoder::updatePosition() {
+void Encoder::updatePulseCount() {
     bool rotatingForward = !digitalRead(channelB);
-    position += (rotatingForward ? 1 : -1);
+    pulseCount += (rotatingForward ? 1 : -1);
 }
 
 
-int64_t Encoder::readPosition() {
-    return position;
+int64_t Encoder::readAngle() {
+    return pulseCount * 360 / pulsePerRevolution;
 }
