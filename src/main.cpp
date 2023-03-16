@@ -18,21 +18,27 @@
 #define KI 5e-3
 #define KD 5e-3
 
-#define MAX_APPLY_VOLTAGE 200
-#define MIN_APPLY_VOLTAGE 100
+#define MIN_CONTROL_SIGNAL 50
+#define MAX_CONTROL_SIGNAL 200
 
+#define PULSE_PER_REVOLUTION 450
 #define BAUDRATE 9600
 #define WARMUP_TIME 5000
 #define SETTLE_CONDITION 0.99
 
 
-Controller g_controller(KP, KI, KD);
-Encoder g_encoder(CHANNEL_A, CHANNEL_B);
+Controller g_controller(KP, KI, KD, MIN_CONTROL_SIGNAL, MAX_CONTROL_SIGNAL);
+Encoder g_encoder(CHANNEL_A, CHANNEL_B, PULSE_PER_REVOLUTION);
 MotorDriver g_driver(ENA_PIN, ENB_PIN, INA_PIN, INB_PIN, INC_PIN, IND_PIN);
 
 
 void onInterrupt() {
-  g_encoder.updatePosition();
+   g_encoder.updatePulseCount();
+}
+
+
+bool reachSettleCondition(float setPoint, float feedback, float settleCondition) {
+    return 1 - abs(setPoint - feedback) / setPoint > settleCondition;
 }
 
 
@@ -48,32 +54,23 @@ void setup() {
 
 void loop() {
   float setAngle = 270;
-  float setPoint = map(setAngle, 0, 360, 0, 450);
-  int64_t feedback = g_encoder.readPosition();
+  float feedbackAngle = g_encoder.readAngle();
 
-  if (1 - abs(setPoint - feedback) / setPoint > SETTLE_CONDITION) {  
+  if (reachSettleCondition(setAngle, feedbackAngle, SETTLE_CONDITION)) {  
       Serial.println("Settle condition reached.");
       g_driver.stopLeftMotor();
       return;
   }
 
-  g_controller.receiveSetPoint(setPoint);
-  g_controller.receiveFeedback(feedback);
+  g_controller.receiveSetPoint(setAngle);
+  g_controller.receiveFeedback(feedbackAngle);
+  
   float controlSignal = g_controller.sendControlSignal();
 
-  if (controlSignal > 0) {
-      controlSignal = min(controlSignal, MAX_APPLY_VOLTAGE);
-      controlSignal = max(controlSignal, MIN_APPLY_VOLTAGE);
-  }
-  else {
-      controlSignal = max(controlSignal, -MAX_APPLY_VOLTAGE);
-      controlSignal = min(controlSignal, -MIN_APPLY_VOLTAGE);
-  }
   g_driver.driveLeftMotor(controlSignal);
 
-  uint16_t feedbackAngle = map(feedback, 0, 450, 0, 360);
   Serial.print("Feedback: ");
-  Serial.print((int32_t)feedbackAngle);
+  Serial.print(feedbackAngle);
   Serial.print("\tControl signal: ");
   Serial.println(controlSignal);
 }
