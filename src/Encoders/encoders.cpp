@@ -3,7 +3,11 @@
 #include "Encoders/encoders.h"
 
 
-Encoder::Encoder(const uint8_t channelA, const uint8_t channelB, uint16_t pulsePerRevolution) {
+Encoder::Encoder(
+    const uint8_t channelA, 
+    const uint8_t channelB, 
+    const uint16_t pulsePerRevolution
+) {
     this->channelA = channelA;
     this->channelB = channelB;
     this->pulsePerRevolution = pulsePerRevolution;
