@@ -16,7 +16,7 @@
 // Controller's parameters
 #define KP 0.5
 #define KI 5e-3
-#define KD 5e-3
+#define KD 0
 
 #define MIN_CONTROL_SIGNAL 50
 #define MAX_CONTROL_SIGNAL 200
@@ -44,7 +44,6 @@ bool reachSettleCondition(float setPoint, float feedback, float settleCondition)
 
 void setup() {
   Serial.begin(BAUDRATE);
-  Serial.println("Warming up...");
   delay(WARMUP_TIME);
   g_driver.connect();
   g_encoder.connect();
@@ -56,21 +55,18 @@ void loop() {
   float setAngle = 270;
   float feedbackAngle = g_encoder.readAngle();
 
+  g_controller.receiveSetPoint(setAngle);
+  g_controller.receiveFeedback(feedbackAngle);
+
+  Serial.println(setAngle);
+  Serial.println(feedbackAngle);
+
   if (reachSettleCondition(setAngle, feedbackAngle, SETTLE_CONDITION)) {  
-      Serial.println("Settle condition reached.");
       g_driver.stopLeftMotor();
       return;
   }
 
-  g_controller.receiveSetPoint(setAngle);
-  g_controller.receiveFeedback(feedbackAngle);
-  
   float controlSignal = g_controller.sendControlSignal();
 
   g_driver.driveLeftMotor(controlSignal);
-
-  Serial.print("Feedback: ");
-  Serial.print(feedbackAngle);
-  Serial.print("\tControl signal: ");
-  Serial.println(controlSignal);
 }
